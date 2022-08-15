@@ -1,0 +1,58 @@
+<div id="container">
+
+    <p>Click a button to call <code>getUserMedia()</code> with appropriate resolution.</p>
+    <br>
+
+    <div id="buttons">
+        <button onclick="getMedia(qvgaConstraints)">QVGA</button>
+        <button onclick="getMedia(vgaConstraints)">VGA (gUM)</button>
+        <button onclick="constraintChange()">VGA (applyConstraints)</button>
+    </div>
+    <video id="video" playsinline autoplay></video>
+</div>
+
+<script>
+let stream;
+
+let currentWidth = 0;
+let currentHeight = 0;
+
+const qvgaConstraints = {
+  video: {width: {exact: 320}, height: {exact: 240}}
+};
+
+const vgaConstraints = {
+  video: {width: {exact: 640}, height: {exact: 480}}
+};
+
+function gotStream(mediaStream) {
+  stream = window.stream = mediaStream; // stream available to console
+  video.srcObject = mediaStream;
+  const track = mediaStream.getVideoTracks()[0];
+  const constraints = track.getConstraints();
+  console.log('Result constraints: ' + JSON.stringify(constraints));
+}
+
+
+function constraintChange() {
+  const track = window.stream.getVideoTracks()[0];
+  const constraints = vgaConstraints.video;
+  console.log('applying ' + JSON.stringify(constraints));
+  track.applyConstraints(constraints)
+      .then(() => {
+        console.log('applyConstraint success');
+      })
+}
+
+function getMedia(constraints) {
+  if (stream) {
+    stream.getTracks().forEach(track => {
+      track.stop();
+    });
+  }
+
+  navigator.mediaDevices.getUserMedia(constraints)
+      .then(gotStream)
+}
+
+</script>
